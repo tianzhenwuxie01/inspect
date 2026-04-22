@@ -23,7 +23,7 @@ jobs:
 
       - uses: pnpm/action-setup@v4
 
-      - run: pnpm install
+      - run: pnpm install --frozen-lockfile
 
       - run: pnpm exec tsx ./scripts/updateVersion.ts
       - run: pnpm run build:mirror
