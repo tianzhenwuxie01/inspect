@@ -98,7 +98,6 @@ const columns: DataTableColumns<DeviceApp> = [
         <NSelect
           v-model:value="selectedUserId"
           :options="userOptions"
-          aria-label="设备用户"
           class="min-w-[280px] w-[40%] max-w-[420px]"
         />
         <TextSearchInput

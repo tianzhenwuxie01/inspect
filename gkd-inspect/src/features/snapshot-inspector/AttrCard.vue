@@ -9,7 +9,8 @@ import {
   NTooltip,
   NTr,
 } from 'naive-ui';
-import { computed } from 'vue';
+import { computed, useTemplateRef } from 'vue';
+import type { PopoverInst } from 'naive-ui';
 
 import GkSvg from '@/shared/ui/GkSvg.vue';
 import GkDraggableCard from '@/shared/ui/GkDraggableCard.vue';
@@ -44,6 +45,10 @@ const updateLayout = (value: GkDraggableCardValue) => {
 };
 
 const { focusNode } = useSnapshotStore();
+const nullHintTooltip = useTemplateRef<PopoverInst>('nullHintTooltip');
+const setNullHintVisible = (visible: boolean) => {
+  nullHintTooltip.value?.setShow(visible);
+};
 
 type AttrTipMap = Record<
   string,
@@ -52,7 +57,7 @@ type AttrTipMap = Record<
 
 const attrTip = computed<AttrTipMap>(() => {
   const node = focusNode.value;
-  if (!node) return {};
+  if (!node?.attr) return {};
   return {
     _id: {
       desc: `虚拟属性(真机不可用):生成快照访问节点顺序`,
@@ -94,8 +99,14 @@ const attrTip = computed<AttrTipMap>(() => {
 
 const lenAttrNames = [`text`, `desc`];
 const attrs = computed(() => {
-  if (!focusNode.value) return [];
-  return Object.entries(focusNode.value.attr)
+  const node = focusNode.value;
+  if (!node) return [];
+  const values = node.attr ?? {
+    _id: node.id,
+    _pid: node.pid,
+    index: node.nullAttr.index,
+  };
+  return Object.entries(values)
     .map(([name, value]) => {
       const attr = {
         name,
@@ -153,8 +164,42 @@ const selectText = computed(() => {
     >
       <thead>
         <tr :ref="onRef" class="cursor-move">
-          <th>Name</th>
-          <th>Value</th>
+          <th colspan="2">
+            <div class="flex items-center gap-[4px] pr-[24px]">
+              <NEllipsis class="max-w-[calc(var(--gkd-w)*0.25)]"
+                >#{{ focusNode.id }}
+                {{
+                  focusNode.attr
+                    ? focusNode.attr.name.split('.').at(-1)
+                    : 'NULL'
+                }}</NEllipsis
+              >
+              <NTooltip
+                v-if="focusNode.nullAttr"
+                :key="focusNode.id"
+                ref="nullHintTooltip"
+                placement="bottom"
+                :width="280"
+              >
+                <template #trigger>
+                  <NButton
+                    text
+                    size="small"
+                    @pointerdown.stop
+                    @click.stop="setNullHintVisible(true)"
+                    @focus="setNullHintVisible(true)"
+                    @blur="setNullHintVisible(false)"
+                    @keydown.esc.stop="setNullHintVisible(false)"
+                  >
+                    <template #icon>
+                      <NIcon size="16"><GkSvg name="info" /></NIcon>
+                    </template>
+                  </NButton>
+                </template>
+                采集时未能获取节点信息，仅保留其在树中的位置
+              </NTooltip>
+            </div>
+          </th>
         </tr>
       </thead>
       <NTbody>
@@ -193,7 +238,7 @@ const selectText = computed(() => {
             </NEllipsis>
           </NTd>
         </NTr>
-        <NTr>
+        <NTr v-if="selectText">
           <NTd colspan="2">
             <div class="flex items-center h-[24px] px-[2px]">
               <NTooltip>

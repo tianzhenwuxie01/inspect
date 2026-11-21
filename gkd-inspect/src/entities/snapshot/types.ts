@@ -11,16 +11,31 @@ export interface DeviceInfo {
   gkdVersionName?: string;
 }
 
-export interface RawNode {
+interface NodeBase {
   id: number;
   pid: number;
   quickFind?: boolean;
   idQf?: boolean;
   textQf?: boolean;
-  attr: RawAttr;
   parent?: RawNode;
   children: RawNode[];
 }
+
+export interface NullAttr {
+  index: number;
+}
+
+export interface AttrNode extends NodeBase {
+  attr: RawAttr;
+  nullAttr?: undefined;
+}
+
+export interface NullNode extends NodeBase {
+  attr?: undefined;
+  nullAttr: NullAttr;
+}
+
+export type RawNode = AttrNode | NullNode;
 
 export interface RawAttr {
   id?: string;

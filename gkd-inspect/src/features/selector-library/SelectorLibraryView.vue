@@ -386,7 +386,6 @@ const togglePinned = (preset: SelectorPreset) => pinTask.run(preset.id, preset);
                     iconSizeTiny: '14px',
                   }"
                   title="复制"
-                  aria-label="复制"
                   @click="copySelector(preset.selector)"
                 >
                   <template #icon>

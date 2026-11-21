@@ -332,7 +332,6 @@ const getDeviceText = (snapshot: Snapshot) => {
           :src="previewCache.urls[previewSnapshot.id]"
           class="block h-auto w-auto max-w-full rounded-[6px]"
           :style="{ maxHeight: `${previewMaxHeight}px` }"
-          alt="快照预览"
         />
         <div v-else class="py-[20px] text-center opacity-70">
           {{

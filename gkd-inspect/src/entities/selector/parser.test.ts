@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
-import type { RawNode } from '../snapshot/types.ts';
+import type { AttrNode, RawNode } from '../snapshot/types.ts';
 import { parseSelector } from './parser.ts';
 
-const createNode = (id: number, parent?: RawNode, text = ''): RawNode => {
-  const node: RawNode = {
+const createNode = (id: number, parent?: AttrNode, text = ''): AttrNode => {
+  const node: AttrNode = {
     id,
     pid: parent?.id ?? -1,
     parent,
@@ -131,4 +131,31 @@ test('serialized implicit ancestor relations retain paths when query links are r
   assert.deepEqual(queryIds(source, root), [1]);
   const units = restored.querySelfOrSelectorAllWithTrace(root)[0].units;
   assert.equal(units[0].steps[0].formattedRelation, '>');
+});
+
+test('NULL slots stay absent from selectors while later child and sibling indices stay unchanged', () => {
+  const root = createNode(0);
+  root.attr.name = 'android.widget.FrameLayout';
+  createNode(1, root, 'before');
+  const gap: RawNode = {
+    id: 2,
+    pid: 0,
+    parent: root,
+    children: [],
+    nullAttr: { index: 1 },
+  };
+  root.children.push(gap);
+  const after = createNode(3, root, 'after');
+  after.attr.name = 'android.widget.ImageView';
+  assert.deepEqual(queryIds('*', root), [0, 1, 3]);
+  assert.deepEqual(queryIds('[childCount=0]', root), [1, 3]);
+  assert.deepEqual(queryIds('ImageView[index=2]', root), [3]);
+  assert.deepEqual(queryIds('@ImageView <3 FrameLayout', root), [3]);
+  assert.deepEqual(queryIds('TextView +2 ImageView', root), [3]);
+  assert.deepEqual(
+    queryIds('[getChild(1)=null][getChild(2).text="after"]', root),
+    [0],
+  );
+  assert.equal(parseSelector('*').match(gap), undefined);
+  assert.deepEqual(queryIds('*', gap), []);
 });

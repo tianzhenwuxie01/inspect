@@ -47,7 +47,6 @@ const closeSettings = () => emit('update:show', false);
       <span>关闭生成分享链接弹窗提醒</span>
       <NSwitch
         :value="settingsStore.ignoreUploadWarn"
-        aria-label="关闭生成分享链接弹窗提醒"
         class="shrink-0"
         @update:value="settingsActions.update({ ignoreUploadWarn: $event })"
       />
@@ -57,7 +56,6 @@ const closeSettings = () => emit('update:show', false);
       <span>打开快照页面自动生成分享链接（链接公开可访问）</span>
       <NSwitch
         :value="settingsStore.autoUploadImport"
-        aria-label="打开快照页面自动生成分享链接"
         class="shrink-0"
         @update:value="settingsActions.update({ autoUploadImport: $event })"
       />

@@ -442,7 +442,7 @@ export const useSharedSnapshotHoverImg = createSharedComposable(() => {
 
     const attr = focusNode.value?.attr;
     if (!focusNode.value || !img || !attr || !imgLoadTime.value) {
-      return ``;
+      return;
     }
     const imgWidth = imgSize.width.value;
     const imgHeight = imgSize.height.value;

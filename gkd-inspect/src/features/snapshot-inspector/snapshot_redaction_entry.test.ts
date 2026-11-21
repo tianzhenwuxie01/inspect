@@ -51,7 +51,6 @@ test('脱敏弹窗只保留右上角关闭入口', () => {
 });
 
 test('清除全部区域使用可撤销的独立图标入口', () => {
-  assert.match(privacyRedactionDialogSource, /aria-label="清除全部区域"/);
   assert.match(
     privacyRedactionDialogSource,
     /<GkSvg name="clear-selection" \/>/,
@@ -63,7 +62,10 @@ test('清除全部区域使用可撤销的独立图标入口', () => {
 test('创建脱敏副本后显示带链接的完成弹窗而不自动跳转', () => {
   assert.match(screenshotCardSource, /title="创建完成"/);
   assert.match(screenshotCardSource, /新快照链接/);
-  assert.match(screenshotCardSource, /<RouterLink[\s\S]*创建的快照/);
+  assert.match(
+    screenshotCardSource,
+    /<RouterLink[\s\S]*\{\{ createdSnapshotHref \}\}/,
+  );
   assert.doesNotMatch(screenshotCardSource, />\s*关闭\s*<\/NButton>/);
   assert.doesNotMatch(
     screenshotCardSource,

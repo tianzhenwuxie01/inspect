@@ -40,7 +40,6 @@ const {
         type="button"
         class="inline-grid h-[22px] w-[24px] cursor-pointer place-items-center rounded-[3px] border-0 bg-transparent p-0 leading-[22px] text-[#475569] enabled:hover:bg-[#e2e8f0] disabled:cursor-default disabled:opacity-40 focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#2563eb] focus-visible:outline-offset-1"
         :disabled="!matchCount"
-        aria-label="上一个匹配项"
         title="上一个匹配项 (Shift+Enter)"
         @mousedown.prevent
         @click="selectRelativeResult(-1)"
@@ -51,7 +50,6 @@ const {
         type="button"
         class="inline-grid h-[22px] w-[24px] cursor-pointer place-items-center rounded-[3px] border-0 bg-transparent p-0 leading-[22px] text-[#475569] enabled:hover:bg-[#e2e8f0] disabled:cursor-default disabled:opacity-40 focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#2563eb] focus-visible:outline-offset-1"
         :disabled="!matchCount"
-        aria-label="下一个匹配项"
         title="下一个匹配项 (Enter)"
         @mousedown.prevent
         @click="selectRelativeResult(1)"
@@ -82,8 +80,6 @@ const {
                 ? 'bg-[#dbeafe] text-[#1d4ed8]'
                 : 'bg-transparent text-[#475569] hover:bg-[#e2e8f0]'
             "
-            :aria-pressed="searchOptions.matchCase"
-            aria-label="区分大小写"
             title="区分大小写"
             @mousedown.prevent
             @click="toggleSearchOption('matchCase')"
@@ -98,8 +94,6 @@ const {
                 ? 'bg-[#dbeafe] text-[#1d4ed8]'
                 : 'bg-transparent text-[#475569] hover:bg-[#e2e8f0]'
             "
-            :aria-pressed="searchOptions.wholeWord"
-            aria-label="全词匹配"
             title="全词匹配"
             @mousedown.prevent
             @click="toggleSearchOption('wholeWord')"
@@ -114,8 +108,6 @@ const {
                 ? 'bg-[#dbeafe] text-[#1d4ed8]'
                 : 'bg-transparent text-[#475569] hover:bg-[#e2e8f0]'
             "
-            :aria-pressed="searchOptions.useRegex"
-            aria-label="使用正则表达式"
             title="使用正则表达式"
             @mousedown.prevent
             @click="toggleSearchOption('useRegex')"

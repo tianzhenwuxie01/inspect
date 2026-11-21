@@ -1,4 +1,4 @@
-import type { RawNode, Snapshot } from '@/entities/snapshot/types';
+import type { AttrNode, RawNode, Snapshot } from '@/entities/snapshot/types';
 import type { RectX } from '@/shared/types/common';
 export interface RedactionRect extends RectX {}
 
@@ -21,20 +21,22 @@ export const getOffscreenTextNodes = (
   width: number,
   height: number,
 ) =>
-  nodes.filter(({ attr }) => {
-    const visible =
-      attr.right > attr.left &&
-      attr.bottom > attr.top &&
-      intersectsRedactionRect(attr, {
-        left: 0,
-        top: 0,
-        right: width,
-        bottom: height,
-      });
-    return (
-      !visible && (hasSensitiveText(attr.text) || hasSensitiveText(attr.desc))
-    );
-  });
+  nodes
+    .filter((node): node is AttrNode => Boolean(node.attr))
+    .filter(({ attr }) => {
+      const visible =
+        attr.right > attr.left &&
+        attr.bottom > attr.top &&
+        intersectsRedactionRect(attr, {
+          left: 0,
+          top: 0,
+          right: width,
+          bottom: height,
+        });
+      return (
+        !visible && (hasSensitiveText(attr.text) || hasSensitiveText(attr.desc))
+      );
+    });
 
 const normalizeRect = (rect: RedactionRect): RedactionRect => ({
   left: Math.min(rect.left, rect.right),
@@ -68,7 +70,7 @@ export const scaleRedactionRectangles = (
     bottom: rect.bottom * scaleY,
   }));
 
-const shouldRedactNode = (node: RawNode, rectangles: RedactionRect[]) =>
+const shouldRedactNode = (node: AttrNode, rectangles: RedactionRect[]) =>
   rectangles.some((rect) => intersectsRedactionRect(node.attr, rect));
 
 export const createRedactedSnapshotCopy = (
@@ -80,6 +82,14 @@ export const createRedactedSnapshotCopy = (
   ...source,
   id,
   nodes: source.nodes.map((node) => {
+    if (!node.attr) {
+      return {
+        id: node.id,
+        pid: node.pid,
+        nullAttr: { ...node.nullAttr },
+        children: [],
+      };
+    }
     const redact = shouldRedactNode(node, rectangles);
     const selected = nodeIds.includes(node.id);
     const redactText = redact || (selected && hasSensitiveText(node.attr.text));

@@ -31,7 +31,7 @@ export const getFastQueryEvidence = (
         if (!field) continue;
         const marked =
           node.quickFind || (field === 'text' ? node.textQf : node.idQf);
-        const value = node.attr[field];
+        const value = node.attr?.[field];
         if (!marked || typeof value !== 'string' || !query.accepts(value))
           continue;
         return {

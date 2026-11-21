@@ -336,7 +336,7 @@ onBeforeUnmount(cancelPreview);
   >
     <NScrollbar class="max-h-[75vh]">
       <div class="flex flex-col gap-[12px] pr-[8px]">
-        <div v-if="errorText" role="alert" class="text-red-500">
+        <div v-if="errorText" class="text-red-500">
           {{ errorText }}
         </div>
         <div class="flex flex-wrap gap-[8px]">

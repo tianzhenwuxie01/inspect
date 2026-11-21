@@ -12,7 +12,7 @@ import {
 } from 'naive-ui';
 import { computed, shallowReactive, shallowRef } from 'vue';
 
-import type { RawNode, Snapshot } from '@/entities/snapshot/types';
+import type { AttrNode, RawNode, Snapshot } from '@/entities/snapshot/types';
 import { getAppInfo, getNodeLabel } from '@/entities/snapshot/node';
 import { message } from '@/shared/services/feedback';
 import { copy } from '@/shared/lib/clipboard';
@@ -39,7 +39,7 @@ const props = defineProps<{
   show: boolean;
   snapshot: Snapshot;
   rootNode: RawNode;
-  targetNode: RawNode;
+  targetNode: AttrNode;
   selector: string;
   fastQuery: boolean;
   startedAt: number;
@@ -177,12 +177,15 @@ const updateIncludeActivity = (value: boolean) => {
 const updateIncludeReferences = (value: boolean) => {
   form.includeReferences = value;
 };
-const getTargetRect = () => ({
-  left: props.targetNode.attr.left,
-  top: props.targetNode.attr.top,
-  width: props.targetNode.attr.width,
-  height: props.targetNode.attr.height,
-});
+const getTargetRect = () => {
+  const attr = props.targetNode.attr;
+  return {
+    left: attr.left,
+    top: attr.top,
+    width: attr.width,
+    height: attr.height,
+  };
+};
 const updatePosition = () => {
   if (!positionPoint.value) return;
   try {

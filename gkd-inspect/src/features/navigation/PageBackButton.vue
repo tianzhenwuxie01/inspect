@@ -11,12 +11,7 @@ const { goBack } = useRouteBack();
   <div class="flex">
     <NTooltip placement="right">
       <template #trigger>
-        <NButton
-          text
-          style="--n-icon-size: 24px"
-          aria-label="返回上一页"
-          @click="goBack"
-        >
+        <NButton text style="--n-icon-size: 24px" @click="goBack">
           <template #icon>
             <GkSvg name="arrow" class="rotate-90" />
           </template>

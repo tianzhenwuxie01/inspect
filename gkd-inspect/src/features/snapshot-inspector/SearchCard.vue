@@ -346,7 +346,6 @@ const updateExpandedKeys = (keys: number[]) => {
           class="ml-[12px]"
           text
           title="选择器库"
-          aria-label="选择器库"
           @click="openSelectorLibrary()"
         >
           <template #icon><GkSvg name="selector-library" /></template>
@@ -373,7 +372,6 @@ const updateExpandedKeys = (keys: number[]) => {
             secondary
             size="tiny"
             title="搜索"
-            aria-label="搜索"
             @click="searchBySelector"
           >
             <template #icon>
@@ -406,6 +404,7 @@ const updateExpandedKeys = (keys: number[]) => {
     @update:show="setSelectorLibraryVisible"
   />
   <RuleComposerDialog
+    v-if="rootNode.attr"
     :show="ruleComposerShow"
     :snapshot="snapshot"
     :rootNode="rootNode"

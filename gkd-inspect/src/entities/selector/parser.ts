@@ -1,4 +1,4 @@
-import type { RawNode } from '@/entities/snapshot/types';
+import type { AttrNode, RawNode } from '@/entities/snapshot/types';
 import {
   createDefaultSelectorTypeModel,
   JsNodeAdapter,
@@ -9,11 +9,11 @@ import {
   type SelectorPosition,
   type SelectorToken,
 } from '@gkd-kit/selector';
-import { isRawNode } from '../snapshot/node.ts';
+import { isAttrNode } from '../snapshot/node.ts';
 
-class SnapshotNodeAdapter extends JsNodeAdapter<RawNode> {
+class SnapshotNodeAdapter extends JsNodeAdapter<AttrNode> {
   getAttr(target: unknown, name: string) {
-    if (!isRawNode(target)) return null;
+    if (!isAttrNode(target)) return null;
     if (name === '_id') return target.id;
     if (name === '_pid') return target.pid;
     if (name === 'parent') return target.parent ?? null;
@@ -21,26 +21,27 @@ class SnapshotNodeAdapter extends JsNodeAdapter<RawNode> {
   }
 
   getInvoke(target: unknown, name: string, args: unknown[]) {
-    if (!isRawNode(target) || name !== 'getChild') return null;
+    if (!isAttrNode(target) || name !== 'getChild') return null;
     const index = args[0];
     return typeof index === 'number' && Number.isSafeInteger(index)
-      ? (target.children[index] ?? null)
+      ? this.getChild(target, index)
       : null;
   }
 
-  getName(node: RawNode) {
+  getName(node: AttrNode) {
     return node.attr.name;
   }
-  getChildCount(node: RawNode) {
+  getChildCount(node: AttrNode) {
     return node.children.length;
   }
-  getChild(node: RawNode, index: number) {
-    return node.children[index] ?? null;
+  getChild(node: AttrNode, index: number) {
+    const child = node.children[index];
+    return child?.attr ? child : null;
   }
-  getParent(node: RawNode) {
-    return node.parent ?? null;
+  getParent(node: AttrNode) {
+    return node.parent?.attr ? node.parent : null;
   }
-  getNodeKey(node: RawNode) {
+  getNodeKey(node: AttrNode) {
     return node.id;
   }
 }
@@ -56,11 +57,11 @@ export interface ResolvedSelector {
   positions: SelectorPosition[];
   canCopy: boolean;
   toString: () => string;
-  match: (node: RawNode) => RawNode | undefined;
-  querySelfOrSelectorAll: (node: RawNode | undefined) => RawNode[];
+  match: (node: RawNode) => AttrNode | undefined;
+  querySelfOrSelectorAll: (node: RawNode | undefined) => AttrNode[];
   querySelfOrSelectorAllWithTrace: (
     node: RawNode | undefined,
-  ) => SelectorMatch<RawNode>[];
+  ) => SelectorMatch<AttrNode>[];
 }
 
 export const normalizeSelectorErrorIndex = (
@@ -96,9 +97,12 @@ export const parseSelector = (source: string): ResolvedSelector => {
         source.slice(token.start, token.end).startsWith('_'),
     ),
     toString: () => value.toString(),
-    match: (node) => adapter.match(node, value, matchOptions) ?? undefined,
+    match: (node) =>
+      node.attr
+        ? (adapter.match(node, value, matchOptions) ?? undefined)
+        : undefined,
     querySelfOrSelectorAll(node) {
-      if (!node) return [];
+      if (!node?.attr) return [];
       const self = adapter.match(node, value, matchOptions);
       return uniqueTargets(
         [
@@ -109,7 +113,7 @@ export const parseSelector = (source: string): ResolvedSelector => {
       );
     },
     querySelfOrSelectorAllWithTrace(node) {
-      if (!node) return [];
+      if (!node?.attr) return [];
       const self = adapter.matchWithTrace(node, value, matchOptions);
       return uniqueTargets(
         [

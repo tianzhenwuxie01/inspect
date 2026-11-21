@@ -1,4 +1,4 @@
-import type { RawNode } from '@/entities/snapshot/types';
+import type { AttrNode, RawNode } from '@/entities/snapshot/types';
 import type { SelectorMatch } from '@gkd-kit/selector';
 import type { ResolvedSelector } from '@/entities/selector/parser';
 
@@ -12,8 +12,8 @@ export interface SelectorSearchResult {
   gkd: true;
   key: number;
   selector: ResolvedSelector;
-  nodes: RawNode[];
-  results: SelectorMatch<RawNode>[];
+  nodes: AttrNode[];
+  results: SelectorMatch<AttrNode>[];
   fastQueryEvidence?: FastQueryEvidence;
 }
 

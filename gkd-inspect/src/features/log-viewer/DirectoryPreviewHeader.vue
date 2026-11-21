@@ -33,7 +33,6 @@ const emit = defineEmits<{
           ? 'border-[#18a058] text-[#18a058] font-semibold'
           : 'border-transparent text-[#475569] hover:text-[#18a058]'
       "
-      :aria-pressed="listActive"
       @click="emit('selectList')"
     >
       {{ listLabel }}

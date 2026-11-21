@@ -42,9 +42,6 @@ const showWasmGcCompatibilityDialog = (error: unknown) => {
 
   const overlay = document.createElement('div');
   overlay.id = WASM_GC_DIALOG_ID;
-  overlay.setAttribute('role', 'dialog');
-  overlay.setAttribute('aria-modal', 'true');
-  overlay.setAttribute('aria-labelledby', `${WASM_GC_DIALOG_ID}-title`);
   applyStyles(overlay, {
     position: 'fixed',
     inset: '0',
@@ -71,7 +68,6 @@ const showWasmGcCompatibilityDialog = (error: unknown) => {
   });
 
   const title = createText('浏览器版本过低');
-  title.id = `${WASM_GC_DIALOG_ID}-title`;
   applyStyles(title, {
     marginBottom: '12px',
     color: '#d03050',

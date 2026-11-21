@@ -34,10 +34,6 @@ const HighlightedText = (props: { fragments: readonly TextLineFragment[] }) => (
     )}
   </>
 );
-
-const activatePopover = (event: KeyboardEvent) => {
-  if (event.currentTarget instanceof HTMLElement) event.currentTarget.click();
-};
 </script>
 
 <template>
@@ -79,11 +75,7 @@ const activatePopover = (event: KeyboardEvent) => {
         >
           <template #trigger>
             <span
-              role="button"
-              tabindex="0"
               class="cursor-pointer text-[#2563eb] underline decoration-dashed underline-offset-2"
-              @keydown.enter.prevent="activatePopover"
-              @keydown.space.prevent="activatePopover"
             >
               <HighlightedText :fragments="token.fragments" />
             </span>

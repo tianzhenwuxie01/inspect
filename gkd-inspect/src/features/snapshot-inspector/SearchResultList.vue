@@ -98,8 +98,6 @@ const handleResultToggle = (event: MouseEvent, key: number) => {
           <button
             type="button"
             class="result-toggle"
-            :aria-expanded="expandedKeys.includes(result.key)"
-            :aria-label="`${expandedKeys.includes(result.key) ? '收起' : '展开'} ${result.nodes.length} 个节点`"
             @click="handleResultToggle($event, result.key)"
           >
             <span

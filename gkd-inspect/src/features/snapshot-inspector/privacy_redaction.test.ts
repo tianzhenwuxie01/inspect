@@ -78,9 +78,9 @@ test('keeps meaningful descriptions and preserves filtered fields when redacting
   );
   const source = { id: 1, nodes } as Snapshot;
   const copy = createRedactedSnapshotCopy(source, 2, [], [1]);
-  assert.equal(copy.nodes[1].attr.text, '，');
-  assert.equal(copy.nodes[1].attr.textLen, 1);
-  assert.equal(copy.nodes[1].attr.desc, '***');
+  assert.equal(copy.nodes[1].attr?.text, '，');
+  assert.equal(copy.nodes[1].attr?.textLen, 1);
+  assert.equal(copy.nodes[1].attr?.desc, '***');
 });
 
 test('masks each field to its original string length', () => {
@@ -123,12 +123,12 @@ test('masks each field to its original string length', () => {
     '',
     undefined,
   ].entries()) {
-    assert.equal(copy.nodes[index].attr.text, expected);
-    assert.equal(copy.nodes[index].attr.desc, expected);
-    assert.equal(copy.nodes[index].attr.textLen, expected?.length);
-    assert.equal(copy.nodes[index].attr.descLen, expected?.length);
+    assert.equal(copy.nodes[index].attr?.text, expected);
+    assert.equal(copy.nodes[index].attr?.desc, expected);
+    assert.equal(copy.nodes[index].attr?.textLen, expected?.length);
+    assert.equal(copy.nodes[index].attr?.descLen, expected?.length);
   }
-  assert.equal(source.nodes[0].attr.text, '张三');
+  assert.equal(source.nodes[0].attr?.text, '张三');
 });
 
 test('lists offscreen and zero-size text nodes, but not partially visible nodes', () => {
@@ -170,12 +170,12 @@ test('redacts selected offscreen fields without rectangles and preserves masked 
     ],
   } as unknown as Snapshot;
   const copy = createRedactedSnapshotCopy(source, 2, [], [4]);
-  assert.equal(copy.nodes[0].attr.text, '****');
-  assert.equal(copy.nodes[0].attr.textLen, 4);
-  assert.equal(copy.nodes[0].attr.desc, '******');
-  assert.equal(copy.nodes[0].attr.descLen, 6);
-  assert.equal(copy.nodes[1].attr.text, 'keep');
-  assert.equal(source.nodes[0].attr.desc, 'secret');
+  assert.equal(copy.nodes[0].attr?.text, '****');
+  assert.equal(copy.nodes[0].attr?.textLen, 4);
+  assert.equal(copy.nodes[0].attr?.desc, '******');
+  assert.equal(copy.nodes[0].attr?.descLen, 6);
+  assert.equal(copy.nodes[1].attr?.text, 'keep');
+  assert.equal(source.nodes[0].attr?.desc, 'secret');
 });
 
 test('uses strict rectangle overlap for node redaction', () => {
@@ -252,16 +252,54 @@ test('creates a detached snapshot and only masks overlapping node text', () => {
     { left: 5, top: 5, right: 20, bottom: 20 },
   ]);
   assert.equal(result.id, 2);
-  assert.equal(result.nodes[0].attr.text, '******');
-  assert.equal(result.nodes[0].attr.desc, '******');
-  assert.equal(result.nodes[0].attr.textLen, 6);
-  assert.equal(result.nodes[0].attr.descLen, 6);
-  assert.equal(result.nodes[1].attr.text, 'keep');
-  assert.equal(source.nodes[0].attr.text, 'public');
+  assert.equal(result.nodes[0].attr?.text, '******');
+  assert.equal(result.nodes[0].attr?.desc, '******');
+  assert.equal(result.nodes[0].attr?.textLen, 6);
+  assert.equal(result.nodes[0].attr?.descLen, 6);
+  assert.equal(result.nodes[1].attr?.text, 'keep');
+  assert.equal(source.nodes[0].attr?.text, 'public');
   assert.equal(result.nodes[0].children.length, 0);
 });
 
 test('allocates the first unused snapshot id', async () => {
   const result = await getAvailableSnapshotId(10, async (id) => id < 12);
   assert.equal(result, 12);
+});
+
+test('redacted exports preserve nullAttr slots and never manufacture attributes or bounds for NULL', () => {
+  const source = {
+    id: 1,
+    nodes: [
+      {
+        id: 0,
+        pid: -1,
+        attr: {
+          name: 'Root',
+          text: 'secret',
+          left: 0,
+          top: 0,
+          right: 100,
+          bottom: 100,
+        },
+      },
+      { id: 1, pid: 0, nullAttr: { index: 0 } },
+    ],
+  } as unknown as Snapshot;
+  const copy = createRedactedSnapshotCopy(
+    source,
+    2,
+    [{ left: 0, top: 0, right: 100, bottom: 100 }],
+    [1],
+  );
+  const serialized = JSON.parse(JSON.stringify(copy));
+  assert.equal(serialized.nodes[0].attr.text, '******');
+  assert.deepEqual(serialized.nodes[1], {
+    id: 1,
+    pid: 0,
+    nullAttr: { index: 0 },
+    children: [],
+  });
+  assert.deepEqual(getOffscreenTextNodes(source.nodes, 100, 100), []);
+  assert.equal(source.nodes[0].attr?.text, 'secret');
+  assert.notEqual(copy.nodes[1].nullAttr, source.nodes[1].nullAttr);
 });

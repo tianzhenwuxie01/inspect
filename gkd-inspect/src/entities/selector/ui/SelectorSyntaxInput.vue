@@ -140,7 +140,6 @@ onBeforeUnmount(() => {
       />
       <div
         v-if="highlightSegments"
-        aria-hidden="true"
         class="selector-error-highlight pointer-events-none absolute z-1 overflow-hidden"
         :style="highlightViewportStyle"
       >
@@ -164,7 +163,6 @@ onBeforeUnmount(() => {
     >
       <span
         v-if="diagnostic.status == 'invalid'"
-        role="alert"
         class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[11px] leading-[22px] text-[#d03050]"
         :title="feedbackText"
       >

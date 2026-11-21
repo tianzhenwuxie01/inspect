@@ -59,10 +59,9 @@ vi.mock('@/features/snapshot-management/export', () => ({
   exportSnapshotAsImageId: vi.fn(),
   exportSnapshotAsImportId: vi.fn(),
 }));
-vi.mock('@/entities/snapshot/node', () => ({
+vi.mock('@/entities/snapshot/node', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/entities/snapshot/node')>()),
   getAppInfo: () => ({ name: 'test' }),
-  listToTree: (nodes: Snapshot['nodes']) => nodes[0],
-  findNodesByXy: () => [],
 }));
 
 import { useSnapshotStore } from './snapshot';
@@ -143,7 +142,7 @@ test('retains the whole previous snapshot until the next image is decoded', asyn
   assert.equal((await pending).status, 'success');
   assert.equal(store.snapshot.value?.id, 2);
   assert.notEqual(store.screenshotUrl.value, previous.url);
-  assert.equal(store.focusNode.value?.attr.text, '2');
+  assert.equal(store.focusNode.value?.attr?.text, '2');
   assert.equal(store.loading.value, false);
   assert.ok(
     vi
@@ -167,7 +166,7 @@ test('late loads cannot replace a newer snapshot or its execution status', async
   delayed.resolve(makeSnapshot(2));
   assert.equal((await oldLoad).status, 'stale');
   assert.equal(store.snapshot.value?.id, 3);
-  assert.equal(store.focusNode.value?.attr.text, '3');
+  assert.equal(store.focusNode.value?.attr?.text, '3');
   assert.equal(store.loading.value, false);
   assert.equal(store.error.value, undefined);
 });
@@ -264,4 +263,33 @@ test('remote import metadata is committed together with the decoded frame', asyn
   assert.equal(store.snapshot.value?.id, 2);
   assert.equal(mocks.snapshotIds[20], 2);
   assert.equal(mocks.importIds[2], 20);
+});
+
+test('snapshot loading restores a NULL selection from URL and preserves the original serialized snapshot', async () => {
+  const source = makeSnapshot(1);
+  source.nodes[0].attr!.childCount = 2;
+  source.nodes.push(
+    { id: 1, pid: 0, nullAttr: { index: 0 }, children: [] },
+    {
+      id: 2,
+      pid: 0,
+      attr: { ...source.nodes[0].attr!, index: 1, text: 'after' },
+      children: [],
+    },
+  );
+  mocks.getSnapshot.mockResolvedValueOnce(source);
+  mocks.route.query = {
+    state: await encodeSnapshotUrlStateParam({ focusNodeId: 1 }),
+  };
+  const store = scope.run(() => useSnapshotStore())!;
+  await store.loadFromRoute(navigate(1));
+  assert.equal(store.focusNode.value?.id, 1);
+  const selectedGap = store.focusNode.value;
+  assert.equal(selectedGap?.attr, undefined);
+  assert.equal(store.focusNode.value?.parent?.id, 0);
+  assert.equal(store.rootNode.value?.children[1].attr?.index, 1);
+  assert.equal(Object.hasOwn(store.snapshot.value!.nodes[1], 'attr'), false);
+  assert.equal(store.snapshot.value!.nodes[1].parent, undefined);
+  store.updateFocusNode(store.rootNode.value!.children[1], { syncUrl: false });
+  assert.equal(store.focusNode.value?.attr?.text, 'after');
 });

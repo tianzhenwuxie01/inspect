@@ -309,7 +309,6 @@ const applyRedaction = () => {
           <NButton
             :disabled="!canUndo"
             title="撤销（Ctrl/⌘+Z）"
-            aria-label="撤销"
             @click="undoRectangles"
           >
             <template #icon>
@@ -319,7 +318,6 @@ const applyRedaction = () => {
           <NButton
             :disabled="!canRedo"
             title="恢复（Ctrl+Y / Ctrl/⌘+Shift+Z）"
-            aria-label="恢复"
             @click="redoRectangles"
           >
             <template #icon>
@@ -333,7 +331,6 @@ const applyRedaction = () => {
               quaternary
               class="clear-selection-button"
               :disabled="!rectangles.length"
-              aria-label="清除全部区域"
               @click="clearRectangles"
             >
               <template #icon>

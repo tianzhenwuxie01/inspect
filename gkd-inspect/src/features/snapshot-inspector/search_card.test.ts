@@ -62,7 +62,6 @@ test(`选择器语法错误高亮不会接管输入事件`, () => {
   assert.match(selectorLibraryPageSource, /<SelectorSyntaxInput\b/);
   assert.match(selectorSyntaxInputSource, /inspectSelectorSyntax/);
   assert.match(selectorSyntaxInputSource, /pointer-events-none/);
-  assert.match(selectorSyntaxInputSource, /aria-hidden="true"/);
   assert.match(selectorSyntaxInputSource, /addEventListener\('scroll'/);
 });
 
@@ -189,13 +188,13 @@ test(`选择器库弹窗保持挂载以触发入场动画并在关闭时重置�
   assert.match(selectorLibraryDialogSource, /@afterLeave="resetDialogState"/);
 });
 
-test(`规则编排器保持挂载以触发入场动画并在关闭时重置表单`, () => {
+test(`规则编排器预先挂载以触发入场动画并在关闭时重置表单`, () => {
   const dialogTag = searchCardSource.match(
     /<RuleComposerDialog\b[\s\S]*?\/>/,
   )?.[0];
   assert.ok(dialogTag, `未找到规则编排器入口`);
   assert.match(dialogTag, /:show="ruleComposerShow"/);
-  assert.doesNotMatch(dialogTag, /\bv-if=/);
+  assert.doesNotMatch(dialogTag, /\bv-if="[^"]*ruleComposerShow/);
   assert.doesNotMatch(dialogTag, /:key=/);
   assert.doesNotMatch(searchCardSource, /ruleComposerKey/);
   assert.match(ruleComposerDialogSource, /const resetDialogState = \(\) =>/);

@@ -254,8 +254,6 @@ const inputImportRef = shallowRef();
           <NButton
             :type="viewMode == 'table' ? 'primary' : 'default'"
             title="表格视图"
-            aria-label="表格视图"
-            :aria-pressed="viewMode == 'table'"
             @click="setViewMode('table')"
           >
             <template #icon><GkSvg name="view-table" /></template>
@@ -263,8 +261,6 @@ const inputImportRef = shallowRef();
           <NButton
             :type="viewMode == 'group' ? 'primary' : 'default'"
             title="分组视图"
-            aria-label="分组视图"
-            :aria-pressed="viewMode == 'group'"
             @click="setViewMode('group')"
           >
             <template #icon><GkSvg name="view-group" /></template>
@@ -307,7 +303,7 @@ const inputImportRef = shallowRef();
         <NTooltip>
           <template #trigger>
             <RouterLink class="flex" to="/selector/library">
-              <NButton text aria-label="选择器库">
+              <NButton text>
                 <GkSvg name="selector-library" />
               </NButton>
             </RouterLink>

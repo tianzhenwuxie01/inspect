@@ -48,8 +48,6 @@ const invalidRegex = computed(() => {
                 ? 'bg-[#dbeafe] text-[#1d4ed8]'
                 : 'bg-transparent text-[#475569] hover:bg-[#e2e8f0]'
             "
-            :aria-pressed="matchCase"
-            aria-label="区分大小写"
             title="区分大小写"
             @mousedown.prevent
             @click="matchCase = !matchCase"
@@ -64,8 +62,6 @@ const invalidRegex = computed(() => {
                 ? 'bg-[#dbeafe] text-[#1d4ed8]'
                 : 'bg-transparent text-[#475569] hover:bg-[#e2e8f0]'
             "
-            :aria-pressed="wholeWord"
-            aria-label="全词匹配"
             title="全词匹配"
             @mousedown.prevent
             @click="wholeWord = !wholeWord"
@@ -80,8 +76,6 @@ const invalidRegex = computed(() => {
                 ? 'bg-[#dbeafe] text-[#1d4ed8]'
                 : 'bg-transparent text-[#475569] hover:bg-[#e2e8f0]'
             "
-            :aria-pressed="useRegex"
-            aria-label="使用正则表达式"
             title="使用正则表达式"
             @mousedown.prevent
             @click="useRegex = !useRegex"

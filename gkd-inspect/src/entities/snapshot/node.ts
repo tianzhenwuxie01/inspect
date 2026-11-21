@@ -1,6 +1,7 @@
 import type {
   DeviceInfo,
   RawNode,
+  AttrNode,
   Snapshot,
   AppInfo,
 } from '@/entities/snapshot/types';
@@ -23,6 +24,7 @@ export const getNodeSelectorText = (
   isFirst: boolean = true /* 调用时须省略 */,
   lastIndex: number = 1 /* 调用时须省略 */,
 ): string => {
+  if (!curNode.attr) return '';
   // 先处理递归基
   if (!curNode.parent) {
     // 当前节点为根节点
@@ -60,11 +62,13 @@ export const getNodeSelectorText = (
 
 export const listToTree = (nodes: RawNode[]) => {
   nodes.forEach((node) => {
-    node.attr ??= { name: `NULL` } as any;
+    if (Boolean(node.attr) === Boolean(node.nullAttr)) {
+      throw new Error(`快照节点 ${node.id} 必须且只能包含 attr 或 nullAttr`);
+    }
     node.children ??= [];
     node.parent = nodes[node.pid];
     if (node.parent) {
-      node.attr.index ??= node.parent.children.length;
+      if (node.attr) node.attr.index ??= node.parent.children.length;
       node.parent?.children.push(node);
     }
     Object.defineProperty(node, 'isLeaf', {
@@ -72,20 +76,22 @@ export const listToTree = (nodes: RawNode[]) => {
         return node.children.length == 0;
       },
     });
-    node.attr.depth = (node.parent?.attr?.depth ?? -1) + 1;
-    node.attr._id ??= node.id;
-    node.attr._pid ??= node.pid;
+    if (node.attr) {
+      node.attr.depth = (node.parent?.attr?.depth ?? -1) + 1;
+      node.attr._id ??= node.id;
+      node.attr._pid ??= node.pid;
+    }
   });
   return nodes[0];
 };
 
-const xyInNode = (node: RawNode, position: Position): boolean => {
+const xyInNode = (node: AttrNode, position: Position): boolean => {
   const attr = node.attr;
   const { x, y } = position;
   return attr.left <= x && x <= attr.right && attr.top <= y && y <= attr.bottom;
 };
 
-const includesRectNode = (outer: RawNode, inner: RawNode) => {
+const includesRectNode = (outer: AttrNode, inner: AttrNode) => {
   return (
     outer.attr.left <= inner.attr.left &&
     outer.attr.top <= inner.attr.top &&
@@ -94,7 +100,7 @@ const includesRectNode = (outer: RawNode, inner: RawNode) => {
   );
 };
 
-const equalRectNode = (a: RawNode, b: RawNode) => {
+const equalRectNode = (a: AttrNode, b: AttrNode) => {
   return (
     a.attr.left === b.attr.left &&
     a.attr.top === b.attr.top &&
@@ -121,9 +127,9 @@ export const findNodesByXy = (
   position: Position | undefined,
 ): RawNode[] => {
   if (!nodes || !position) return [];
-  let results: RawNode[] = [];
+  let results: AttrNode[] = [];
   for (const node of nodes) {
-    if (node?.attr?.left === undefined) continue;
+    if (!node.attr || node.attr.left === undefined) continue;
     if (!xyInNode(node, position)) continue;
     results.push(node);
   }
@@ -159,7 +165,7 @@ export const findNodesByXy = (
   return results;
 };
 
-const getNodeArea = (node: RawNode) => {
+const getNodeArea = (node: AttrNode) => {
   const w = node.attr.width ?? node.attr.right - node.attr.left;
   const height = node.attr.height ?? node.attr.bottom - node.attr.top;
   return w * height;
@@ -191,15 +197,16 @@ export const getImageSize = async (src: string) => {
     img.src = src;
   });
 };
-const getSafeName = (node: RawNode) => {
+const getSafeName = (node: AttrNode) => {
   const c = node.attr.childCount;
   return (node.attr.name || `🐔` + (c > 1 ? `` : ` [${c}]`)).split('.').at(-1)!;
 };
-const getLabelSuffix = (node: RawNode) => {
+const getLabelSuffix = (node: AttrNode) => {
   return node.attr.text || node.attr.desc || node.attr.vid || node.attr.id;
 };
 const labelKey = Symbol(`labelKey`);
 export const getNodeLabel = (node: RawNode): string => {
+  if (!node.attr) return `NULL · index=${node.nullAttr.index}`;
   if (Reflect.has(node, labelKey)) {
     return Reflect.get(node, labelKey);
   }
@@ -221,6 +228,7 @@ export const getNodeLabel = (node: RawNode): string => {
   return label;
 };
 export const getLimitLabel = (node: RawNode, limit = 15): string => {
+  if (!node.attr) return getNodeLabel(node);
   let label = getSafeName(node);
   const length = node.children.length;
   if (length > 1) {
@@ -272,7 +280,7 @@ export const getGkdAppInfo = (snapshot: Snapshot): AppInfo => {
   );
 };
 
-export const isRawNode = (node: any): node is RawNode => {
+export const isAttrNode = (node: any): node is AttrNode => {
   if (
     node &&
     typeof node === 'object' &&
@@ -285,9 +293,10 @@ export const isRawNode = (node: any): node is RawNode => {
 };
 
 export const getNodeStyle = (node: RawNode, focusNode?: RawNode) => {
-  const qf = Boolean(node.idQf || node.textQf || node.quickFind);
+  const qf = getNodeQf(node);
   const fontWeight = qf ? 'bold' : undefined;
-  const color = node.id === focusNode?.id ? '#00F' : undefined;
+  const color =
+    node.id === focusNode?.id ? '#00F' : node.nullAttr ? '#888' : undefined;
   return {
     fontWeight,
     color,
@@ -342,7 +351,7 @@ export const getTrackTreeContext = (
             i2 > i && !minTreeNodes.has(n) && minTreeNodes.has(children[i2 + 1])
           );
         }) || children.at(-1)!;
-      return `[${i} ~ ${lastNode.attr.index}]`;
+      return `[${i} ~ ${lastNode.attr ? lastNode.attr.index : lastNode.nullAttr.index}]`;
     }
     if (descendantPlaceholderNodes.get(node)) {
       return `[ ... ]`;
@@ -424,5 +433,5 @@ export const getTrackTreeContext = (
 };
 
 export const getNodeQf = (node: RawNode): boolean => {
-  return Boolean(node.idQf || node.textQf || node.quickFind);
+  return Boolean(node.attr && (node.idQf || node.textQf || node.quickFind));
 };

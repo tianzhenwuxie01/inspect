@@ -1,15 +1,15 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
-import type { RawNode } from '../../entities/snapshot/types.ts';
+import type { AttrNode, RawNode } from '../../entities/snapshot/types.ts';
 import { parseSelector } from '../../entities/selector/parser.ts';
 import { getFastQueryEvidence } from './selector_diagnostics.ts';
 
 const node = (
   id: number,
-  attrs: Partial<RawNode['attr']> = {},
-  parent?: RawNode,
-): RawNode => {
-  const result: RawNode = {
+  attrs: Partial<AttrNode['attr']> = {},
+  parent?: AttrNode,
+): AttrNode => {
+  const result: AttrNode = {
     id,
     pid: parent?.id ?? -1,
     parent,

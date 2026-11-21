@@ -115,11 +115,7 @@ const setTrackVisible = (visible: boolean) => {
         <div />
         <NTooltip v-if="screenshotUrl" placement="right">
           <template #trigger>
-            <NButton
-              text
-              aria-label="创建脱敏副本"
-              @click="setRedactionVisible(true)"
-            >
+            <NButton text @click="setRedactionVisible(true)">
               <GkSvg name="privacy" />
             </NButton>
           </template>

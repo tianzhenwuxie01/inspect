@@ -179,6 +179,7 @@ const createRedactedCopy = redactionTask.run;
       class="pointer-events-none absolute left-[2px] top-[2px] size-[calc(100%-4px)]"
     >
       <div
+        v-if="positionStyle"
         class="absolute transition-all duration-300 border-[1px] border-blue-400 border-solid"
         :style="positionStyle"
       >
@@ -223,12 +224,10 @@ const createRedactedCopy = redactionTask.run;
         <RouterLink
           v-if="createdSnapshotPath"
           :to="createdSnapshotPath"
-          aria-label="打开创建的快照"
           class="break-all text-[#2080f0] no-underline hover:underline"
           :class="{
             'pointer-events-none opacity-50': deletingSourceSnapshot,
           }"
-          :aria-disabled="deletingSourceSnapshot"
           :tabindex="deletingSourceSnapshot ? -1 : undefined"
           @click="handleCreatedSnapshotLinkClick"
         >
